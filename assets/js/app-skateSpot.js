@@ -13,6 +13,7 @@ const categoryIcons = (() => {
     };
 })();
 
+//Renderiza as imagens 
 function renderGallery(images = []) {
     if (!images || images.length === 0) return '';
     const imgs = images.map(url =>
@@ -23,6 +24,7 @@ function renderGallery(images = []) {
     return `<div class="popup-gallery">${imgs}</div>`;
 }
 
+// Evitar erros no HTML ao inseriri a imagem ("")
 function escapeAttr(str) {
     return (str ?? '').toString().replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -33,6 +35,7 @@ function iconForCategory(category) {
     return categoryIcons[key] || categoryIcons.default;
 }
 
+// Categorias Normalizadas
 function normalizeCategory(cat) {
     const c = (cat ?? '').toString().trim().toLowerCase();
     if (['park', 'parque', 'pista', 'ramp', 'rampa'].includes(c)) return 'park';
@@ -43,6 +46,7 @@ function normalizeCategory(cat) {
     return 'default';
 }
 
+// Carregamento do Mapa
 function initMap() {
     map = L.map('map', { zoomControl: true }).setView([-23.55, -46.63], DEFAULT_ZOOM); // SP como fallback
     map.zoomControl.setPosition('bottomleft');
@@ -56,9 +60,10 @@ function initMap() {
 
     spotsLayer = L.layerGroup().addTo(map);
 
-    // Clique no mapa para escolher localização manual se geolocation for negada
+    // // Clique no mapa para escolher localização manual se geolocation for negada
     map.on('click', (e) => {
         setUserLocation(e.latlng.lat, e.latlng.lng, true);
+
     });
 
     document.getElementById('useLocationBtn').addEventListener('click', useMyLocation);
@@ -72,6 +77,7 @@ function initMap() {
     useMyLocation();
 }
 
+// Pegar Localização automaticamete pelo Navegador e colocar o ponto no mapa
 function useMyLocation() {
     if (!('geolocation' in navigator)) {
         alert('Geolocalização não suportada. Clique no mapa para escolher um ponto.');
@@ -91,6 +97,7 @@ function useMyLocation() {
     );
 }
 
+// Marca a localização ao clicar no mapa
 function setUserLocation(lat, lng, fetch = false) {
     if (!userMarker) {
         const userIcon = L.icon({
@@ -108,23 +115,13 @@ function setUserLocation(lat, lng, fetch = false) {
         userMarker.setLatLng([lat, lng]);
     }
 
-    // // círculo de 10km (ou o valor digitado)
-    // const radiusKm = getRadiusKm();
-    // const radiusMeters = radiusKm * 1000;
-
-    // if (!radiusCircle) {
-    //     radiusCircle = L.circle([lat, lng], { radius: radiusMeters });
-    //     radiusCircle.addTo(map);
-    // } else {
-    //     radiusCircle.setLatLng([lat, lng]);
-    //     radiusCircle.setRadius(radiusMeters);
-    // }
-
+    // Posiciona a visualização do mapa para aonde foi clicado
     map.setView([lat, lng], DEFAULT_ZOOM);
 
     if (fetch) loadSpots(lat, lng);
 }
 
+// Valor padrao da distancia até o Spot
 function getRadiusKm() {
     const input = document.getElementById('radiusKm');
     let val = parseFloat(input.value);
@@ -132,10 +129,11 @@ function getRadiusKm() {
     return Math.min(Math.max(val, 0.5), 20); // 0.5–20km
 }
 
+// Carrega os Spots
 async function loadSpots(lat, lng) {
     const radiusKm = getRadiusKm();
     try {
-        // Certifique-se que o caminho está correto
+        //
         const res = await fetch(`/boomslang/spots?lat=${lat}&lng=${lng}&radius_km=${radiusKm}`, {
             headers: { 'Accept': 'application/json' }
         });
@@ -147,7 +145,7 @@ async function loadSpots(lat, lng) {
 
         if (!data.ok) throw new Error(data.error || 'Erro ao carregar spots');
 
-        // limpa camadas antigas
+        // limpa camadas antigas, caso contrario as mantera no mapa
         spotsLayer.clearLayers();
 
         data.spots.forEach(s => {

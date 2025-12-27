@@ -75,6 +75,11 @@ class ControllerSkateSpot
         }
     }
 
+    function addSpot($data)
+    {
+        return "Vou construir, só fui cortar o cabelo";
+    }
+
 }
 
 ?>

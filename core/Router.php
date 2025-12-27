@@ -21,6 +21,11 @@ class Router
         $this->add('GET', $patterns, $handler);
     }
 
+    function post($patterns, $handler)
+    {
+        $this->add('POST', $patterns, $handler);
+    }
+
     public function dispatch($method, $path)
     {
         $path = rtrim($path, '/');
