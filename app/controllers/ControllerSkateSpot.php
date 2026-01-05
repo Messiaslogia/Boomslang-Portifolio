@@ -77,6 +77,44 @@ class ControllerSkateSpot
 
     function addSpot($data)
     {
+        $name = isset($data['name']) ? $data['name'] : null;
+        $description = isset($data['description']) ? $data['description'] : null;
+        $lat = isset($data['lat']) ? $data['lat'] : null;
+        $lng = isset($data['lng']) ? $data['lng'] : null;
+
+        if ($name === null || $lat === null || $lng === null) {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Os campos obrigatorios estão NUll'
+            ]);
+            exit;
+        }
+
+        try {
+            $sql = "INSERT INTO spots (name, description, lat, lng) VALUES (:name, :description, :lat, :lng)";
+
+            $stmt = $this->pdo->prepare($sql);
+
+            $stmt->execute([
+                ':name' => $name,
+                ':description' => $description,
+                ':lat' => $lat,
+                ':lng' => $lng
+            ]);
+
+
+
+        } catch (\Throwable $th) {
+
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Erro ao adicinar Spot',
+                'message' => $th
+            ]);
+        }
         return "Vou construir, só fui cortar o cabelo";
     }
 

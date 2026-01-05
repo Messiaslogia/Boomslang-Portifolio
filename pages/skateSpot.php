@@ -96,6 +96,9 @@
         <input type="number" id="radiusKm" value="3" min="0.5" max="20" step="0.5">
 
         <button id="reloadBtn">🔄 Recarregar Spots</button>
+
+        <input id="endereco" placeholder="Digite o endereço">
+        <button onclick="buscar()">Buscar</button>
     </div>
 
     <!-- Mapa -->
@@ -106,6 +109,30 @@
 
     <!-- Seu JavaScript -->
     <script src="/boomslang/assets/js/app-skateSpot.js"></script>
+
+    <script>
+        async function buscar() {
+            const endereco = document.getElementById('endereco').value;
+
+            // const res = await fetch(
+            //     `http://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`
+            // );
+
+            const searchLocation = await fetch(`/boomslang/searchLocalization?format=json&q=${encodeURIComponent(endereco)}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            // const data = await searchLocation.json();
+
+            // if (data.length > 0) {
+            //     console.log(data[0])
+            //     // console.log("Latitude:", data[0].lat);
+            //     // console.log("Longitude:", data[0].lon);
+            // } else {
+            //     alert("Endereço não encontrado");
+            // }
+        }
+    </script>
 </body>
 
 </html>

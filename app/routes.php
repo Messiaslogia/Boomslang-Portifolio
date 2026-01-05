@@ -24,12 +24,12 @@ $router->post('/sendSpots', function () use ($ControllerSkateSpot) {
     $data = json_decode($json, true);
 
     // Validação
-    if (!$data || !isset($data['name']) || !isset($data['lat']) || !isset($data['lng'])) {
+    if (!$data || !isset($data['name']) || !isset($data['lat']) || !isset($data['lng']) || !isset($data['description'])) {
         http_response_code(400);
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'message' => 'Campos obrigatórios: name, lat, lng'
+            'message' => 'Campos obrigatórios: name, lat, lng, descripton'
         ]);
         return;
     }
@@ -40,5 +40,28 @@ $router->post('/sendSpots', function () use ($ControllerSkateSpot) {
     // Retorna JSON
     header('Content-Type: application/json');
     echo json_encode($result);
+});
+
+$router->get('/searchLocalization', function () {
+    header('Content-Type: application/json');
+
+    $q = $_GET['q'] ?? null;
+    $endereco = json_encode([$q]);
+
+    $url = "https://nominatim.openstreetmap.org/search?format=json&q={$q}";
+    $response = file_get_contents($url);
+    print_r($response);
+    exit;
+    $data = json_decode($response, true);
+    // echo $response;
+    if (!empty($data)) {
+        echo json_encode([
+            'lat' => $data[0]['lat'],
+            'lng' => $data[0]['lon']
+        ]);
+    } else {
+        echo json_encode(['erro' => 'Endereço não encontrado']);
+    }
+
 });
 

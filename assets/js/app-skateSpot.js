@@ -1,4 +1,4 @@
-const DEFAULT_ZOOM = 14;
+const DEFAULT_ZOOM = 18;
 let map, userMarker, radiusCircle, spotsLayer;
 
 const categoryIcons = (() => {
