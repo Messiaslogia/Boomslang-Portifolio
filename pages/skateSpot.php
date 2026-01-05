@@ -114,25 +114,28 @@
         async function buscar() {
             const endereco = document.getElementById('endereco').value;
 
-            // const res = await fetch(
-            //     `http://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`
-            // );
+            try {
+                const res = await fetch(
+                    `/boomslang/searchLocalization?q=${encodeURIComponent(endereco)}`
+                );
 
-            const searchLocation = await fetch(`/boomslang/searchLocalization?format=json&q=${encodeURIComponent(endereco)}`, {
-                headers: { 'Accept': 'application/json' }
-            });
+                const data = await res.json();
 
-            // const data = await searchLocation.json();
+                if (data.erro) {
+                    console.error('Erro:', data.erro);
+                    return;
+                }
 
-            // if (data.length > 0) {
-            //     console.log(data[0])
-            //     // console.log("Latitude:", data[0].lat);
-            //     // console.log("Longitude:", data[0].lon);
-            // } else {
-            //     alert("Endereço não encontrado");
-            // }
+                console.log('Latitude:', data.lat);
+                console.log('Longitude:', data.lng);
+                console.log('Resposta completa:', data.raw);
+
+            } catch (err) {
+                console.error('Erro no fetch:', err);
+            }
         }
     </script>
+
 </body>
 
 </html>

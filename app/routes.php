@@ -43,25 +43,45 @@ $router->post('/sendSpots', function () use ($ControllerSkateSpot) {
 });
 
 $router->get('/searchLocalization', function () {
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=utf-8');
 
-    $q = $_GET['q'] ?? null;
-    $endereco = json_encode([$q]);
+    $q = $_GET['q'] ?? '';
 
-    $url = "https://nominatim.openstreetmap.org/search?format=json&q={$q}";
-    $response = file_get_contents($url);
-    print_r($response);
-    exit;
+    if (!$q) {
+        http_response_code(400);
+        echo json_encode(['erro' => 'Endereço não informado']);
+        return;
+    }
+
+    $url = 'https://nominatim.openstreetmap.org/search?format=json&q=' . urlencode($q);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'BoomslangApp/1.0');
+
+    $response = curl_exec($ch);
+
+    if ($response === false) {
+        http_response_code(500);
+        echo json_encode(['erro' => 'Erro ao consultar API']);
+        curl_close($ch);
+        return;
+    }
+
+    curl_close($ch);
+
     $data = json_decode($response, true);
-    // echo $response;
+
     if (!empty($data)) {
         echo json_encode([
             'lat' => $data[0]['lat'],
-            'lng' => $data[0]['lon']
+            'lng' => $data[0]['lon'],
+            'raw' => $data[0]
         ]);
     } else {
+        http_response_code(404);
         echo json_encode(['erro' => 'Endereço não encontrado']);
     }
-
 });
+
 
