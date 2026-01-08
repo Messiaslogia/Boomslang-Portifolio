@@ -1,6 +1,83 @@
 const DEFAULT_ZOOM = 18;
 let map, userMarker, radiusCircle, spotsLayer;
 
+const hamburger = document.getElementById('hamburger');
+const searchWrapper = document.getElementById('searchWrapper');
+const searchInput = document.getElementById('searchInput');
+const searchButton = document.getElementById('searchButton');
+const controls = document.getElementById('controls');
+const radiusBtn = document.getElementById('radiusBtn');
+const radiusModal = document.getElementById('radiusModal');
+
+// Toggle do menu hambúrguer
+hamburger.addEventListener('click', function () {
+    this.classList.toggle('active');
+    searchWrapper.classList.toggle('expanded');
+    searchButton.classList.toggle('visible');
+    controls.classList.toggle('visible');
+
+    if (searchWrapper.classList.contains('expanded')) {
+        setTimeout(() => {
+            searchInput.focus();
+        }, 500);
+    } else {
+        searchInput.value = '';
+        radiusModal.classList.remove('active');
+    }
+});
+
+// Busca ao clicar no botão
+searchButton.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const searchValue = searchInput.value.trim();
+
+    if (searchValue) {
+        console.log('Buscando por:', searchValue);
+        // Integrar com sua API de busca aqui
+        searchForAddress(searchValue);
+    }
+});
+
+// Busca ao pressionar Enter
+searchInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        searchButton.click();
+    }
+});
+
+// Toggle do modal de raio
+radiusBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    radiusModal.classList.toggle('active');
+});
+
+// Prevenir que cliques dentro do modal fechem ele
+radiusModal.addEventListener('click', function (e) {
+    e.stopPropagation();
+});
+
+
+// Fechar modal ao clicar fora
+document.addEventListener('click', function (e) {
+    if (!radiusBtn.contains(e.target) && !radiusModal.contains(e.target)) {
+        radiusModal.classList.remove('active');
+    }
+
+    if (!searchWrapper.contains(e.target) &&
+        !hamburger.contains(e.target) &&
+        !searchButton.contains(e.target) &&
+        !controls.contains(e.target)) {
+        if (searchWrapper.classList.contains('expanded')) {
+            hamburger.classList.remove('active');
+            searchWrapper.classList.remove('expanded');
+            searchButton.classList.remove('visible');
+            controls.classList.remove('visible');
+            searchInput.value = '';
+            radiusModal.classList.remove('active');
+        }
+    }
+});
+
 const categoryIcons = (() => {
     const base = 'assets/icons/'; // relativo a public/index.html
     return {
@@ -71,6 +148,7 @@ function initMap() {
         if (!userMarker) return;
         const { lat, lng } = userMarker.getLatLng();
         loadSpots(lat, lng);
+        radiusModal.classList.remove('active');
     });
 
     // tenta automaticamente pegar a localização
@@ -168,6 +246,54 @@ async function loadSpots(lat, lng) {
     } catch (e) {
         console.error(e);
         alert('Falha ao buscar spots.');
+    }
+}
+
+async function searchForAddress(endereco) {
+    try {
+        const res = await fetch(
+            `/boomslang/searchLocalization?q=${encodeURIComponent(endereco)}`
+        );
+        const data = await res.json();
+
+        if (data.erro) {
+            console.error('Erro:', data.erro);
+            alert('Endereço não encontrado');
+            return;
+        }
+
+        console.log('Latitude:', data.lat);
+        console.log('Longitude:', data.lng);
+        setUserLocation(data.lat, data.lng, true)
+        // Aqui você move o mapa para a localização encontrada
+        map.setView([data.lat, data.lng], 15);
+    } catch (err) {
+        console.error('Erro no fetch:', err);
+        alert('Erro ao buscar endereço');
+    }
+}
+
+async function buscar() {
+    const endereco = document.getElementById('searchInput').value;
+
+    try {
+        const res = await fetch(
+            `/boomslang/searchLocalization?q=${encodeURIComponent(endereco)}`
+        );
+
+        const data = await res.json();
+
+        if (data.erro) {
+            console.error('Erro:', data.erro);
+            return;
+        }
+
+        console.log('Latitude:', data.lat);
+        console.log('Longitude:', data.lng);
+        console.log('Resposta completa:', data.raw);
+
+    } catch (err) {
+        console.error('Erro no fetch:', err);
     }
 }
 

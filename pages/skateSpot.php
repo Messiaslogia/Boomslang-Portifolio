@@ -452,6 +452,17 @@
 </head>
 
 <body>
+    <div class="controls">
+
+        <!-- <label for="radiusKm">Raio de busca (km):</label> -->
+        <!-- <input type="number" id="radiusKm" value="3" min="0.5" max="20" step="0.5"> -->
+
+        <!-- <button id="reloadBtn">🔄 Recarregar Spots</button> -->
+
+        <!-- <input id="endereco" placeholder="Digite o endereço">
+        <button onclick="buscar()">Buscar</button> -->
+    </div>
+
     <div class="search-container">
         <button class="hamburger" id="hamburger">
             <span></span>
@@ -470,20 +481,20 @@
 
     <!-- Controles - Botões de localização e raio -->
     <div class="controls" id="controls">
-        <button class="control-btn" id="useLocationBtn" title="Usar Minha Localização">
+        <div class="control-btn" id="useLocationBtn" title="Usar Minha Localização">
             <div class="control-icon location-icon"></div>
-        </button>
+        </div>
 
-        <button class="control-btn" id="radiusBtn" title="Ajustar Raio de Busca">
+        <div class="control-btn" id="radiusBtn" title="Ajustar Raio de Busca">
             <div class="control-icon radius-icon"></div>
             <div class="radius-modal" id="radiusModal">
                 <label for="radiusKm">Raio de busca (km):</label>
                 <div class="radius-input-wrapper">
-                    <input type="number" id="radiusKm" value="3" min="0.5" max="20" step="0.5">
-                    <p id="applyRadius">Aplicar</p>
+                    <input type="number" id="radiusKm" value="3">
+                    <p id="reloadBtn">Aplicar</p>
                 </div>
             </div>
-        </button>
+        </div>
     </div>
 
     <!-- Mapa -->
@@ -495,178 +506,6 @@
 
     <!-- Seu JavaScript -->
     <script src="/boomslang/assets/js/app-skateSpot.js"></script>
-
-    <script>
-        async function buscar() {
-            const endereco = document.getElementById('searchInput').value;
-
-            try {
-                const res = await fetch(
-                    `/boomslang/searchLocalization?q=${encodeURIComponent(endereco)}`
-                );
-
-                const data = await res.json();
-
-                if (data.erro) {
-                    console.error('Erro:', data.erro);
-                    return;
-                }
-
-                console.log('Latitude:', data.lat);
-                console.log('Longitude:', data.lng);
-                console.log('Resposta completa:', data.raw);
-
-            } catch (err) {
-                console.error('Erro no fetch:', err);
-            }
-        }
-    </script>
-
-    <script>
-        const hamburger = document.getElementById('hamburger');
-        const searchWrapper = document.getElementById('searchWrapper');
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
-        const controls = document.getElementById('controls');
-        const radiusBtn = document.getElementById('radiusBtn');
-        const radiusModal = document.getElementById('radiusModal');
-        const applyRadius = document.getElementById('applyRadius');
-        const useLocationBtn = document.getElementById('useLocationBtn');
-
-        // Toggle do menu hambúrguer
-        hamburger.addEventListener('click', function () {
-            this.classList.toggle('active');
-            searchWrapper.classList.toggle('expanded');
-            searchButton.classList.toggle('visible');
-            controls.classList.toggle('visible');
-
-            if (searchWrapper.classList.contains('expanded')) {
-                setTimeout(() => {
-                    searchInput.focus();
-                }, 500);
-            } else {
-                searchInput.value = '';
-                radiusModal.classList.remove('active');
-            }
-        });
-
-        // Busca ao clicar no botão
-        searchButton.addEventListener('click', function (e) {
-            e.stopPropagation();
-            const searchValue = searchInput.value.trim();
-
-            if (searchValue) {
-                console.log('Buscando por:', searchValue);
-                // Integrar com sua API de busca aqui
-                buscarEndereco(searchValue);
-            }
-        });
-
-        // Busca ao pressionar Enter
-        searchInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                searchButton.click();
-            }
-        });
-
-        // Toggle do modal de raio
-        radiusBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            radiusModal.classList.toggle('active');
-        });
-
-        // Prevenir que cliques dentro do modal fechem ele
-        radiusModal.addEventListener('click', function (e) {
-            e.stopPropagation();
-        });
-
-        // Aplicar raio
-        applyRadius.addEventListener('click', function () {
-            const radius = document.getElementById('radiusKm').value;
-            console.log('Raio aplicado:', radius + ' km');
-            radiusModal.classList.remove('active');
-            // Aqui você pode chamar a função que recarrega os spots com o novo raio
-            recarregarSpots(radius);
-        });
-
-        // Usar localização atual
-        useLocationBtn.addEventListener('click', function () {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function (position) {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        console.log('Localização atual:', lat, lng);
-                        // Aqui você pode usar a localização para buscar spots próximos
-                        buscarSpotsPorLocalizacao(lat, lng);
-                    },
-                    function (error) {
-                        console.error('Erro ao obter localização:', error);
-                        alert('Não foi possível obter sua localização. Verifique as permissões do navegador.');
-                    }
-                );
-            } else {
-                alert('Geolocalização não é suportada pelo seu navegador.');
-            }
-        });
-
-        // Fechar modal ao clicar fora
-        document.addEventListener('click', function (e) {
-            if (!radiusBtn.contains(e.target) && !radiusModal.contains(e.target)) {
-                radiusModal.classList.remove('active');
-            }
-
-            if (!searchWrapper.contains(e.target) &&
-                !hamburger.contains(e.target) &&
-                !searchButton.contains(e.target) &&
-                !controls.contains(e.target)) {
-                if (searchWrapper.classList.contains('expanded')) {
-                    hamburger.classList.remove('active');
-                    searchWrapper.classList.remove('expanded');
-                    searchButton.classList.remove('visible');
-                    controls.classList.remove('visible');
-                    searchInput.value = '';
-                    radiusModal.classList.remove('active');
-                }
-            }
-        });
-
-        // Funções de integração (você deve implementar estas com sua lógica)
-        async function buscarEndereco(endereco) {
-            try {
-                const res = await fetch(
-                    `/boomslang/searchLocalization?q=${encodeURIComponent(endereco)}`
-                );
-                const data = await res.json();
-
-                if (data.erro) {
-                    console.error('Erro:', data.erro);
-                    alert('Endereço não encontrado');
-                    return;
-                }
-
-                console.log('Latitude:', data.lat);
-                console.log('Longitude:', data.lng);
-                // Aqui você move o mapa para a localização encontrada
-                // map.setView([data.lat, data.lng], 15);
-            } catch (err) {
-                console.error('Erro no fetch:', err);
-                alert('Erro ao buscar endereço');
-            }
-        }
-
-        function recarregarSpots(radius) {
-            console.log('Recarregando spots com raio de', radius, 'km');
-            // Implemente aqui a lógica para recarregar os spots
-            // Você pode chamar a função do seu app-skateSpot.js
-        }
-
-        function buscarSpotsPorLocalizacao(lat, lng) {
-            console.log('Buscando spots próximos a:', lat, lng);
-            // Implemente aqui a lógica para buscar spots pela localização
-            // map.setView([lat, lng], 15);
-        }
-    </script>
 
 </body>
 
