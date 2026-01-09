@@ -8,6 +8,17 @@ const searchButton = document.getElementById('searchButton');
 const controls = document.getElementById('controls');
 const radiusBtn = document.getElementById('radiusBtn');
 const radiusModal = document.getElementById('radiusModal');
+const categoryIcons = (() => {
+    const base = 'assets/icons/'; // relativo a public/index.html
+    return {
+        park: L.icon({ iconUrl: base + 'icons8-ramp-48.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
+        street: L.icon({ iconUrl: base + 'corrimao.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
+        bowl: L.icon({ iconUrl: base + 'bowl.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
+        plaza: L.icon({ iconUrl: base + 'plaza.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
+        diy: L.icon({ iconUrl: base + 'diy.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
+        default: L.icon({ iconUrl: base + 'spot-default.png', iconSize: [28, 28], iconAnchor: [14, 28], popupAnchor: [0, -24] }),
+    };
+})();
 
 // Toggle do menu hambúrguer
 hamburger.addEventListener('click', function () {
@@ -78,17 +89,7 @@ document.addEventListener('click', function (e) {
     }
 });
 
-const categoryIcons = (() => {
-    const base = 'assets/icons/'; // relativo a public/index.html
-    return {
-        park: L.icon({ iconUrl: base + 'icons8-ramp-48.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
-        street: L.icon({ iconUrl: base + 'corrimao.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
-        bowl: L.icon({ iconUrl: base + 'bowl.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
-        plaza: L.icon({ iconUrl: base + 'plaza.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
-        diy: L.icon({ iconUrl: base + 'diy.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28] }),
-        default: L.icon({ iconUrl: base + 'spot-default.png', iconSize: [28, 28], iconAnchor: [14, 28], popupAnchor: [0, -24] }),
-    };
-})();
+
 
 //Renderiza as imagens 
 function renderGallery(images = []) {
@@ -264,9 +265,9 @@ async function searchForAddress(endereco) {
 
         console.log('Latitude:', data.lat);
         console.log('Longitude:', data.lng);
+        console.log('Raw:', data.raw);
         setUserLocation(data.lat, data.lng, true)
-        // Aqui você move o mapa para a localização encontrada
-        map.setView([data.lat, data.lng], 15);
+        // map.setView([data.lat, data.lng], 15);
     } catch (err) {
         console.error('Erro no fetch:', err);
         alert('Erro ao buscar endereço');

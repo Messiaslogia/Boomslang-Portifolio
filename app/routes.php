@@ -53,7 +53,41 @@ $router->get('/searchLocalization', function () {
         return;
     }
 
-    $url = 'https://nominatim.openstreetmap.org/search?format=json&q=' . urlencode($q);
+    $qClean = preg_replace('/[^0-9]/', '', $q);
+
+    if (strlen($qClean) === 8) {
+        $cepFormatado = substr($qClean, 0, 5) . '-' . substr($qClean, 5, 3);
+
+        $viaCepUrl = "https://viacep.com.br/ws/{$qClean}/json/";
+
+        $ch = curl_init($viaCepUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $viaCepResponse = curl_exec($ch);
+        curl_close($ch);
+
+        $viaCepData = json_decode($viaCepResponse, true);
+
+
+        // Verifica se o CEP é válido
+        if (isset($viaCepData['erro'])) {
+            http_response_code(404);
+            echo json_encode(['erro' => 'CEP não encontrado']);
+            return;
+        }
+
+        // Monta endereço completo para buscar coordenadas
+        $endereco = trim($viaCepData['logradouro']);
+        $bairro = trim($viaCepData['bairro']);
+        $cidade = trim($viaCepData['localidade']);
+        $estado = trim($viaCepData['uf']);
+
+        // Monta query com endereço completo
+        $query = "{$endereco}, {$bairro}, {$cidade}, {$estado}, Brazil";
+    } else {
+        $query = $q . ', Brazil';
+    }
+
+    $url = 'https://nominatim.openstreetmap.org/search?format=json&q=' . urlencode($query) . '&countrycodes=br&addressdetails=1';
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
